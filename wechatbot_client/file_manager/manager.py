@@ -8,6 +8,7 @@ from httpx import URL, AsyncClient
 
 from wechatbot_client.consts import DOWNLOAD_TIMEOUT, FILE_CACHE
 from wechatbot_client.utils import logger_wrapper, run_sync
+from filetype import filetype
 
 from .model import FileCache
 
@@ -68,10 +69,12 @@ class FileManager:
                 res = await client.get(file_url)
                 data = res.content
                 file_id = str(uuid4())
+                file_type = filetype.guess(data)
+                if file_type is not None:
+                    name = f"{name}.{file_type.extension}"
                 file_path = self.file_path / name
                 file_path = self.get_file_name(file_path)
-                with open(file_path, mode="wb") as f:
-                    f.write(data)
+                file_path.write_bytes(data)
             except Exception as e:
                 log("ERROR", f"文件下载失败:{e}")
                 return None
