@@ -7,7 +7,7 @@ from wechatbot_client.driver import Driver
 from wechatbot_client.log import default_filter, log_init, logger
 from wechatbot_client.wechat import WeChatManager
 
-_WeChat: WeChatManager = None
+_WeChat: WeChatManager | None = None
 """微信管理器"""
 
 
@@ -17,7 +17,7 @@ def init() -> None:
     """
     global _WeChat
     env = Env()
-    config = Config(_common_config=env.dict())
+    config = Config.parse_obj(env.dict())
     default_filter.level = config.log_level
     log_init(config.log_days)
     logger.info(f"Current <y><b>Env: {env.environment}</b></y>")

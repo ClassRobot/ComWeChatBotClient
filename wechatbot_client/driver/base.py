@@ -128,7 +128,7 @@ class BackwardWebSocket(BaseWebSocket):
 
     @overrides(BaseWebSocket)
     @websockets_catch_closed
-    async def receive_text(self) -> str:
+    async def receive_text(self) -> str | bytes:
         msg = await self.websocket.recv()
         if isinstance(msg, bytes):
             raise TypeError("WebSocket received unexpected frame type: bytes")

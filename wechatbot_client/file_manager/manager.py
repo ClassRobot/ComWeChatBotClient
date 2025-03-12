@@ -47,7 +47,7 @@ class FileManager:
         return file_path
 
     async def cache_file_id_from_url(
-        self, url: str, name: str, headers: dict = None
+        self, url: str, name: str, headers: dict | None = None
     ) -> Optional[str]:
         """
         说明:
