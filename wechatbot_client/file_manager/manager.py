@@ -4,7 +4,7 @@ from shutil import copyfile
 from typing import Optional, Tuple
 from uuid import uuid4
 
-from httpx import URL, AsyncClient
+from httpx import URL, AsyncClient, Timeout
 
 from wechatbot_client.consts import DOWNLOAD_TIMEOUT, FILE_CACHE
 from wechatbot_client.utils import logger_wrapper, run_sync
@@ -13,6 +13,12 @@ from filetype import filetype
 from .model import FileCache
 
 log = logger_wrapper("File Manager")
+timeout = Timeout(
+    connect=None,  # 连接超时
+    read=None,  # 读取超时（读取响应数据时间）
+    write=None,  # 写入超时（发送请求数据时间）
+    pool=None,  # 连接池获取连接的超时
+)
 
 
 class FileManager:
@@ -63,10 +69,15 @@ class FileManager:
         """
         file_url = URL(url)
         if headers is None:
-            headers = {}
-        async with AsyncClient(headers=headers) as client:
+            headers = {
+                "referer": str(file_url),
+            }
+        async with AsyncClient(
+            headers=headers, timeout=timeout, verify=False
+        ) as client:
             try:
-                res = await client.get(file_url)
+                print("file_url", file_url)
+                res = await client.get(file_url, timeout=timeout)
                 data = res.content
                 file_id = str(uuid4())
                 file_type = filetype.guess(data)
@@ -76,6 +87,7 @@ class FileManager:
                 file_path = self.get_file_name(file_path)
                 file_path.write_bytes(data)
             except Exception as e:
+                print(e)
                 log("ERROR", f"文件下载失败:{e}")
                 return None
 
