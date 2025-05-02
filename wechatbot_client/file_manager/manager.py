@@ -4,6 +4,7 @@ from shutil import copyfile
 from typing import Optional, Tuple
 from uuid import uuid4
 
+
 from httpx import URL, AsyncClient, Timeout
 
 from wechatbot_client.consts import DOWNLOAD_TIMEOUT, FILE_CACHE
@@ -77,7 +78,10 @@ class FileManager:
         ) as client:
             try:
                 print("file_url", file_url)
-                res = await client.get(file_url, timeout=timeout)
+                res = await client.get(file_url, timeout=timeout, headers={
+                    "referer": str(file_url),
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+                })
                 data = res.content
                 file_id = str(uuid4())
                 file_type = filetype.guess(data)
